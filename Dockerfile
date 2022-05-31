@@ -5,7 +5,6 @@ FROM ubuntu:${UBUNTU_VERSION}
 ARG ANDROID_SDK_TOOLS_VERSION=
 ARG ANDROID_PLATFORM_VERSION=
 ARG ANDROID_BUILD_TOOLS_VERSION=
-ARG FLUTTER_VERSION=
 
 # basic tools for development
 USER root
@@ -21,19 +20,20 @@ RUN apt-get update \
         unzip \
         wget \
         zip \
+        fish \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # non-root user
 RUN useradd \
         --shell $(which bash) \
         -G sudo \
-        -m -d /home/sambyeol \
-        sambyeol \
+        -m -d /home/noproxy \
+        noproxy \
     && sed -i -e 's/%sudo.*/%sudo\tALL=(ALL:ALL)\tNOPASSWD:ALL/g' /etc/sudoers \
-    && touch /home/sambyeol/.sudo_as_admin_successful
-USER sambyeol
+    && touch /home/noproxy/.sudo_as_admin_successful
+USER noproxy
 RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" \
-    && sed -i -e 's/OSH_THEME=.*/OSH_THEME="simple"/g' /home/sambyeol/.bashrc
+    && sed -i -e 's/OSH_THEME=.*/OSH_THEME="simple"/g' /home/noproxy/.bashrc
 
 # install android sdk
 ENV ANDROID_HOME=/opt/android-sdk-linux
@@ -69,8 +69,11 @@ RUN apt-get update \
         libnss3-dev \
         libxss1 \
         libxtst6 \
+        nodejs \
+        npm \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
-USER sambyeol
+
+USER noproxy
 RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS_VERSION}_latest.zip -O android-sdk-tools.zip \
     && mkdir -p ${ANDROID_HOME}/cmdline-tools/ \
     && unzip android-sdk-tools.zip -d ${ANDROID_HOME}/cmdline-tools/ \
@@ -83,12 +86,7 @@ RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-${AN
         "build-tools;$ANDROID_BUILD_TOOLS_VERSION" \
     && sdkmanager emulator
 
-# install flutter
-ENV FLUTTER_HOME=/opt/flutter
-ENV FLUTTER_VERSION=${FLUTTER_VERSION}
-ENV FLUTTER_ROOT=$FLUTTER_HOME
-ENV PATH ${FLUTTER_HOME}/bin:${FLUTTER_HOME}/bin/cache/dart-sdk/bin:${PATH}
 
-RUN git clone --depth 1 --branch ${FLUTTER_VERSION} https://github.com/flutter/flutter.git ${FLUTTER_HOME} \
-    && yes | flutter doctor --android-licenses \
-    && flutter config --enable-web
+# RUN git clone --depth 1 --branch ${FLUTTER_VERSION} https://github.com/flutter/flutter.git ${FLUTTER_HOME} \
+#    && yes | flutter doctor --android-licenses \
+#    && flutter config --enable-web
