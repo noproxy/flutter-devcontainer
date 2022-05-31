@@ -25,7 +25,7 @@ RUN apt-get update \
 
 # non-root user
 RUN useradd \
-        --shell $(which bash) \
+        --shell $(which fish) \
         -G sudo \
         -m -d /home/noproxy \
         noproxy \
