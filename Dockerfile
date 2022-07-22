@@ -57,6 +57,7 @@ RUN apt-get update \
         libstdc++6 \
         locales \
         openjdk-11-jdk \
+        openjdk-17-jdk \
         ruby-bundler \
         ruby-full \
         software-properties-common \
